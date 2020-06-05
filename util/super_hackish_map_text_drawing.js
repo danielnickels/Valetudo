@@ -143,7 +143,7 @@ TEXT.forEach(letterId => {
     });
 
 
-    if(letterId !== "WHITESPACE") {
+    if (letterId !== "WHITESPACE") {
         currentPos.x += 6 * (FACTOR*0.75);
     } else {
         currentPos.x += 2*FACTOR;
@@ -162,46 +162,46 @@ const MAP_BORDERS = {
 const FLOOR = [];
 const WALL = [];
 
-for(let i = MAP_BORDERS.x0 + 1; i <= MAP_BORDERS.x1 - 1 ; i++) {
-    for(let j = MAP_BORDERS.y0 + 1; j <= MAP_BORDERS.y1 - 1 ; j++) {
+for (let i = MAP_BORDERS.x0 + 1; i <= MAP_BORDERS.x1 - 1 ; i++) {
+    for (let j = MAP_BORDERS.y0 + 1; j <= MAP_BORDERS.y1 - 1 ; j++) {
         FLOOR.push([i,1024-j]);
     }
 }
 
-for(let i = MAP_BORDERS.x0; i <= MAP_BORDERS.x1 ; i++) {
+for (let i = MAP_BORDERS.x0; i <= MAP_BORDERS.x1 ; i++) {
     WALL.push([i,1024-MAP_BORDERS.y0]);
     WALL.push([i,1024-MAP_BORDERS.y1]);
 }
 
-for(let i = MAP_BORDERS.y0; i <= MAP_BORDERS.y1 ; i++) {
+for (let i = MAP_BORDERS.y0; i <= MAP_BORDERS.y1 ; i++) {
     WALL.push([MAP_BORDERS.x0,1024-i]);
     WALL.push([MAP_BORDERS.x1,1024-i]);
 }
 
 console.log(JSON.stringify({
-        "map_index": 0,
-        "map_sequence": 0,
-        "image": {
-            "position": {
-                "top": 0,
-                "left": 0
-            },
-            "dimensions": {
-                "height": 1024,
-                "width": 1024
-            },
-            "pixels": {
-                "floor": FLOOR,
-                "obstacle_weak": [],
-                "obstacle_strong": WALL
-            }
+    "map_index": 0,
+    "map_sequence": 0,
+    "image": {
+        "position": {
+            "top": 0,
+            "left": 0
         },
-        "path": {
-            "current_angle": 0,
-            "points": PATH
+        "dimensions": {
+            "height": 1024,
+            "width": 1024
         },
-        "charger": PATH[0],
-        "robot": PATH[PATH.length-1],
-        "isDefaultMap": true
-    }
+        "pixels": {
+            "floor": FLOOR,
+            "obstacle_weak": [],
+            "obstacle_strong": WALL
+        }
+    },
+    "path": {
+        "current_angle": 0,
+        "points": PATH
+    },
+    "charger": PATH[0],
+    "robot": PATH[PATH.length-1],
+    "isDefaultMap": true
+}
 ));

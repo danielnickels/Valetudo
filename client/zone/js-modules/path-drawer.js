@@ -1,8 +1,8 @@
-const rocky = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAfCAMAAAHGjw8oAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAADbUExURQAAAICAgICAgICAgICAgICAgHx8fH19fX19fYCAgIGBgX5+foCAgH5+foCAgH9/f39/f35+foCAgH9/f39/f4CAgH5+foGBgYCAgICAgIGBgX9/f39/f35+foCAgH9/f39/f4CAgIODg4eHh4mJiZCQkJycnJ2dnZ6enqCgoKSkpKenp62trbGxsbKysry8vL29vcLCwsXFxcbGxsvLy87OztPT09XV1d/f3+Tk5Ojo6Ozs7O3t7e7u7vHx8fLy8vPz8/X19fb29vf39/j4+Pn5+f39/f7+/v///9yECocAAAAgdFJOUwAGChgcKCkzOT5PVWZnlJmfsLq7wcrS1Nre4OXz+vr7ZhJmqwAAAAlwSFlzAAAXEQAAFxEByibzPwAAAcpJREFUKFNlkolaWkEMhYPggliBFiwWhGOx3AqCsggI4lZt8/5P5ElmuEX5P5hMMjeZJBMRafCvUKnbIqpcioci96owTQWqP0QKC54nImUAyr9k7VD1me4YvibHlJKpVUzQhR+dmdTRSDUvdHh8NK8nhqUVch7cITmXA3rtYDmH+3OL4XI1T+BhJUcXczQxOBXJuve0/daeUr5A6g9muJzo5NI2kPKtyRSGBStKQZ5RC1hENWn6NSRTrDUqLD/lsNKoFTNRETlGMn9dDoGdoDcT1fHPi7EuUDD9dMBw4+6vMQVyInnPXDsdW+8tjWfbYTbzg/OstcagzSlb0+wL/6k+1KPhCrj6YFhzS5eXuHcYNF4bsGtDYhFLTOSMqTsx9e3iyKfynb1SK+RqtEq70RzZPwEGKwv7G0OK1QA42Y+HIgct9P3WWG9ItI/mQTgvoeuWAMdlTRclO/+Km2jwlhDvinGNbyJH6EWV84AJ1wl8JowejqTqTmv+0GqDmVLlg/wLX5Mp2rO3WRs2Zs5fznAVd1EzRh10OONr7hhhM4ctevhiVVxHdYsbq+JzHzaIfdjs5CZ9tGInSfoWEXuL7//fwtn9+Jp7wSryDjBFqnOGeuUxAAAAAElFTkSuQmCC";
+const rocky = "data:image/png;base64,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";
 const img_rocky = new Image();
 img_rocky.src = rocky;
 
-const charger = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAMAAADXqc3KAAAAdVBMVEUAAAA44Yo44Yo44Yo44Yo44Yo44Yo44Yo44Yp26q844Yr///9767Kv89DG9t2g8Md26q5C44/5/vvz/fjY+ei19NNV5ZtJ45T2/fmY78KP7r1v6atq6Kjs/PPi+u7e+uvM9+Gb8MSS7r+H7bhm6KVh56JZ5p3ZkKITAAAACnRSTlMABTr188xpJ4aepd0A4wAAANZJREFUKM9VklmCgzAMQwkQYCSmLKWl2+zL/Y9YcIUL7wvkJHIUJyKkVcyy+JIGCZILGF//QLEqlTmMdsBEXi56igfH/QVGqvXSu49+1KftCbn+dtxB5LOPfNGQNRaKaQNkTJ46OMGczZg8wJB/9TB+J3nFkyqJMp44vBrnWYhJJmOn/5uVzAotV/zACnbUtTbOpHcQzVx8kxw6mavdpYP90dsNcE5k6xd8RoIb2Xgk6xAbfm5C9NiHtxGiXD/U2P96UJunrS/LOeV2GG4wfBi241P5+NwBnAEUFx9FUdUAAAAASUVORK5CYII=";
+const charger = "data:image/png;base64,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";
 const img_charger = new Image();
 img_charger.src = charger;
 
@@ -23,7 +23,7 @@ export function PathDrawer() {
     let predictedPath = undefined;
     let robotPosition = [25600, 25600];
     let chargerPosition = [25600, 25600];
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = 1024;
     canvas.height = 1024;
     // Used to draw smoother path when zoomed into the map
@@ -83,7 +83,7 @@ export function PathDrawer() {
             var canvasimg = document.createElement("canvas");
             canvasimg.width = img.width;
             canvasimg.height = img.height;
-            var ctximg = canvasimg.getContext('2d');
+            var ctximg = canvasimg.getContext("2d");
             const offset = 90;
             ctximg.clearRect(0, 0, img.width, img.height);
             ctximg.translate(img.width / 2, img.width / 2);
@@ -111,8 +111,7 @@ export function PathDrawer() {
             if (first) {
                 ctx.moveTo(x, y);
                 first = false;
-            }
-            else {
+            } else {
                 ctx.lineTo(x, y);
             }
         }
@@ -122,7 +121,7 @@ export function PathDrawer() {
      * Externally called function to (re)draw the path to the canvas
      */
     function draw() {
-        const pathColor = (getComputedStyle(document.documentElement).getPropertyValue('--path') || '#ffffff').trim();
+        const pathColor = (getComputedStyle(document.documentElement).getPropertyValue("--path") || "#ffffff").trim();
 
         const ctx = canvas.getContext("2d");
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -133,10 +132,7 @@ export function PathDrawer() {
         drawLines(path.points, ctx);
         ctx.stroke();
 
-        drawCharger(chargerPosition);
-        drawRobot(robotPosition, path.current_angle);
-
-        if(predictedPath) {
+        if (predictedPath) {
             ctx.beginPath();
             ctx.lineWidth = 1;
             ctx.strokeStyle = pathColor;
@@ -145,14 +141,19 @@ export function PathDrawer() {
             ctx.stroke();
             ctx.setLineDash([]);
         }
+
+        drawCharger(chargerPosition);
+        drawRobot(robotPosition, path.current_angle);
     }
 
     // noinspection JSDuplicatedDeclaration
     return {
         setPath: setPath,
         scale: scale,
-        getScaleFactor: function () { return scaleFactor; },
+        getScaleFactor: function () {
+            return scaleFactor;
+        },
         canvas: canvas,
         draw: draw
-    }
+    };
 }

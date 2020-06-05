@@ -31,7 +31,7 @@ class PossibleTap {
     }
 
     removePointer(evt) {
-        if(evt.pointerId === this.pointerId) {
+        if (evt.pointerId === this.pointerId) {
             const tapEvent = new Event("tap");
             tapEvent.tappedCoordinates = {x: this.pointerDownPosition[0], y: this.pointerDownPosition[1]};
             this.dispatchEvent(tapEvent);
@@ -66,7 +66,7 @@ class OngoingPan {
     }
 
     removePointer(evt) {
-        if(evt.pointerId === this.pointerId) {
+        if (evt.pointerId === this.pointerId) {
             const panEndEvent = new Event("panend");
             panEndEvent.startCoordinates = {x: this.pointerDownPosition[0], y: this.pointerDownPosition[1]};
             panEndEvent.currentCoordinates = {x: evt.clientX, y: evt.clientY};
@@ -97,13 +97,13 @@ class OngoingPinch {
         pinchStartEvent.center = {
             x: (this.pointerDownPosition[0] + this.pointer2DownPosition[0]) / 2,
             y: (this.pointerDownPosition[1] + this.pointer2DownPosition[1]) / 2
-        }
+        };
         this.dispatchEvent(pinchStartEvent);
     }
 
     updatePointerPosition(evts) {
-        for(let evt of evts) {
-            if(evt.pointerId === this.pointerId) {
+        for (let evt of evts) {
+            if (evt.pointerId === this.pointerId) {
                 this.lastPosition = [evt.clientX, evt.clientY];
             } else if (evt.pointerId === this.pointer2Id) {
                 this.lastPosition2 = [evt.clientX, evt.clientY];
@@ -116,13 +116,13 @@ class OngoingPinch {
         pinchMoveEvent.center = {
             x: (this.lastPosition[0] + this.lastPosition2[0]) / 2,
             y: (this.lastPosition[1] + this.lastPosition2[1]) / 2
-        }
+        };
 
         this.dispatchEvent(pinchMoveEvent);
     }
 
     removePointer(evt) {
-        if(evt.pointerId === this.pointerId) {
+        if (evt.pointerId === this.pointerId) {
             this.dispatchEvent(new Event("pinchend"));
             return new OngoingPan(
                 this.pointer2Id,
@@ -174,9 +174,9 @@ export class TouchHandler {
     }
 
     touchChangesFromTouchEvent(evt) {
-        const changedTouches = []
+        const changedTouches = [];
 
-        for(let touch of evt.changedTouches) {
+        for (let touch of evt.changedTouches) {
             changedTouches.push({
                 clientX: touch.clientX,
                 clientY: touch.clientY,
@@ -191,10 +191,10 @@ export class TouchHandler {
         evt.stopPropagation();
         evt.preventDefault();
 
-        if(this.ongoingGesture instanceof NoGesture) {
+        if (this.ongoingGesture instanceof NoGesture) {
             this.ongoingGesture = new PossibleTap(changedTouches[0], this.trackedElement.dispatchEvent.bind(this.trackedElement));
 
-        } else if(this.ongoingGesture instanceof PossibleTap || this.ongoingGesture instanceof OngoingPan) {
+        } else if (this.ongoingGesture instanceof PossibleTap || this.ongoingGesture instanceof OngoingPan) {
             this.ongoingGesture = new OngoingPinch(
                 this.ongoingGesture.pointerId,
                 // start the pinch with the first pointer at the current position
@@ -213,13 +213,13 @@ export class TouchHandler {
         this.ongoingGesture.updatePointerPosition(changedTouches);
 
         // Upgrade Tap to a Pan if the movement tolerance is exeeded
-        if(this.ongoingGesture instanceof PossibleTap && this.ongoingGesture.toleranceExeeded()) {
+        if (this.ongoingGesture instanceof PossibleTap && this.ongoingGesture.toleranceExeeded()) {
             this.ongoingGesture = new OngoingPan(
                 this.ongoingGesture.pointerId,
                 this.ongoingGesture.pointerDownPosition,
                 this.ongoingGesture.lastPosition,
                 this.trackedElement.dispatchEvent.bind(this.trackedElement)
-            )
+            );
         }
     }
 

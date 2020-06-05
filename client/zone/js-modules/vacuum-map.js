@@ -1,8 +1,16 @@
-import { MapDrawer } from "./map-drawer.js";
-import { PathDrawer } from "./path-drawer.js";
-import { trackTransforms } from "./tracked-canvas.js";
-import { GotoPoint, Zone, ForbiddenZone, VirtualWall, CurrentCleaningZone, GotoTarget } from "./locations.js";
-import { TouchHandler } from "./touch-handling.js";
+import {MapDrawer} from "./map-drawer.js";
+import {PathDrawer} from "./path-drawer.js";
+import {trackTransforms} from "./tracked-canvas.js";
+import {
+    CurrentCleaningZone,
+    ForbiddenZone,
+    GotoPoint,
+    GotoTarget,
+    SegmentLabel,
+    VirtualWall,
+    Zone
+} from "./locations.js";
+import {TouchHandler} from "./touch-handling.js";
 
 /**
  * Represents the map and handles all the userinteractions
@@ -15,7 +23,6 @@ export function VacuumMap(canvasElement) {
 
     const mapDrawer = new MapDrawer();
     const pathDrawer = new PathDrawer();
-    let coords = [];
     let ws;
     let heartbeatTimeout;
 
@@ -31,37 +38,37 @@ export function VacuumMap(canvasElement) {
 
     function initWebSocket() {
         const protocol = location.protocol === "https:" ? "wss" : "ws";
-        coords = [];
 
         ws = new WebSocket(`${protocol}://${window.location.host}/`);
-        ws.binaryType = 'arraybuffer';
+        ws.binaryType = "arraybuffer";
 
 
-        ws.onclose = function() {
+        ws.onclose = function () {
             clearTimeout(heartbeatTimeout);
             //setTimeout(() => { initWebSocket() },10000);
         };
-        ws.onmessage = function(event) {
+        ws.onmessage = function (event) {
             // reset connection timeout
             clearTimeout(heartbeatTimeout);
-            heartbeatTimeout = setTimeout(function() {
+            heartbeatTimeout = setTimeout(function () {
                 // try to reconnect
                 initWebSocket();
             }, 5000);
 
-            if(event.data !== "") {
+            if (event.data !== "") {
                 try {
+                    // eslint-disable-next-line no-undef
                     let data = new TextDecoder().decode(pako.inflate(event.data));
                     //console.log('map decompressed: ' + (event.data.byteLength/1024).toFixed(1) + 'k to ' + (data.length/1024).toFixed(1) + 'k (' + (data.length/event.data.byteLength*100).toFixed(2) + '%)');
                     updateMap(JSON.parse(data));
-                } catch(e) {
+                } catch (e) {
                     //TODO something reasonable
                     console.log(e);
                 }
             }
 
         };
-        ws.onerror = function(event) {
+        ws.onerror = function (event) {
             // try to reconnect
             initWebSocket();
         };
@@ -91,9 +98,9 @@ export function VacuumMap(canvasElement) {
     function updateGotoTarget(gotoTarget) {
 
         locations = locations
-            .filter(l => !(l instanceof GotoTarget))
+            .filter(l => !(l instanceof GotoTarget));
 
-        if(gotoTarget) {
+        if (gotoTarget) {
             const p1 = convertFromRealCoords({x: gotoTarget[0], y: gotoTarget[1]});
             locations.push(new GotoTarget(p1.x, p1.y));
         }
@@ -119,11 +126,29 @@ export function VacuumMap(canvasElement) {
             }));
     }
 
+    // eslint-disable-next-line no-unused-vars
+    function updateSegmentMetadata(imageData) {
+        locations = locations
+            .filter(l => !(l instanceof SegmentLabel));
+
+        if (imageData.segments) {
+            Object.keys(imageData.segments).filter(k => k !== "count").forEach(k => {
+                const segmentCenter = [
+                    imageData.segments[k].dimensions.x.mid + imageData.position.left,
+                    imageData.segments[k].dimensions.y.mid + imageData.position.top
+                ];
+
+                locations.push(new SegmentLabel(segmentCenter[0], segmentCenter[1], k));
+            });
+        }
+    }
+
     function updateMapMetadata(mapData) {
+        //updateSegmentMetadata(mapData.image);
         updateGotoTarget(mapData.goto_target);
         updateCurrentZones(mapData.currently_cleaned_zones || []);
         updateForbiddenZones(mapData.no_go_areas || []);
-        updateVirtualWalls(mapData.virtual_walls|| []);
+        updateVirtualWalls(mapData.virtual_walls || []);
     }
 
     /**
@@ -141,9 +166,14 @@ export function VacuumMap(canvasElement) {
         pathDrawer.draw();
 
         switch (options.metaData) {
-            case "none": break;
-            case "forbidden": updateForbiddenZones(mapData.no_go_areas || []); updateVirtualWalls(mapData.virtual_walls|| []); break;
-            default: updateMapMetadata(mapData);
+            case "none":
+                break;
+            case "forbidden":
+                updateForbiddenZones(mapData.no_go_areas || []);
+                updateVirtualWalls(mapData.virtual_walls || []);
+                break;
+            default:
+                updateMapMetadata(mapData);
         }
 
         if (redrawCanvas) redrawCanvas();
@@ -155,7 +185,7 @@ export function VacuumMap(canvasElement) {
      * @param {{x: number, y: number}} coordinatesInMapSpace
      */
     function convertToRealCoords(coordinatesInMapSpace) {
-        return { x: Math.floor(coordinatesInMapSpace.x * 50), y: Math.floor(coordinatesInMapSpace.y * 50) };
+        return {x: Math.floor(coordinatesInMapSpace.x * 50), y: Math.floor(coordinatesInMapSpace.y * 50)};
     }
 
     /**
@@ -163,7 +193,7 @@ export function VacuumMap(canvasElement) {
      * @param {{x: number, y: number}} coordinatesInMillimeter
      */
     function convertFromRealCoords(coordinatesInMillimeter) {
-        return { x: Math.floor(coordinatesInMillimeter.x / 50), y: Math.floor(coordinatesInMillimeter.y / 50) };
+        return {x: Math.floor(coordinatesInMillimeter.x / 50), y: Math.floor(coordinatesInMillimeter.y / 50)};
     }
 
     /**
@@ -172,11 +202,11 @@ export function VacuumMap(canvasElement) {
      */
     function initCanvas(data, opts) {
         if (opts) options = opts;
-        let ctx = canvas.getContext('2d');
+        let ctx = canvas.getContext("2d");
         ctx.imageSmoothingEnabled = false;
         trackTransforms(ctx);
 
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
             // Save the current transformation and recreate it
             // as the transformation state is lost when changing canvas size
             // https://stackoverflow.com/questions/48044951/canvas-state-lost-after-changing-size
@@ -195,9 +225,14 @@ export function VacuumMap(canvasElement) {
 
         switch (options.metaData) {
             case false:
-            case "none": break;
-            case "forbidden": updateForbiddenZones(data.no_go_areas || []); updateVirtualWalls(data.virtual_walls|| []); break;
-            default: updateMapMetadata(data);
+            case "none":
+                break;
+            case "forbidden":
+                updateForbiddenZones(data.no_go_areas || []);
+                updateVirtualWalls(data.virtual_walls || []);
+                break;
+            default:
+                updateMapMetadata(data);
         }
 
         const boundingBox = {
@@ -205,7 +240,7 @@ export function VacuumMap(canvasElement) {
             minY: data.image.position.top,
             maxX: data.image.position.left + data.image.dimensions.width,
             maxY: data.image.position.top + data.image.dimensions.height
-        }
+        };
         const initialScalingFactor = Math.min(
             canvas.width / (boundingBox.maxX - boundingBox.minX),
             canvas.height / (boundingBox.maxY - boundingBox.minY)
@@ -264,6 +299,7 @@ export function VacuumMap(canvasElement) {
                 });
             });
         }
+
         redraw();
         redrawCanvas = redraw;
 
@@ -272,14 +308,14 @@ export function VacuumMap(canvasElement) {
         let dragStart;
 
         function startTranslate(evt) {
-            const { x, y } = relativeCoordinates(evt.coordinates, canvas);
-            lastX = x
+            const {x, y} = relativeCoordinates(evt.coordinates, canvas);
+            lastX = x;
             lastY = y;
             dragStart = ctx.transformedPoint(lastX, lastY);
         }
 
         function moveTranslate(evt) {
-            const { x, y } = relativeCoordinates(evt.currentCoordinates, canvas);
+            const {x, y} = relativeCoordinates(evt.currentCoordinates, canvas);
             const oldX = lastX;
             const oldY = lastY;
             lastX = x;
@@ -289,22 +325,22 @@ export function VacuumMap(canvasElement) {
                 // Let each location handle the panning event
                 // the location can return a stopPropagation bool which
                 // stops the event handling by other locations / the main canvas
-                for(let i = 0; i < locations.length; ++i) {
+                for (let i = 0; i < locations.length; ++i) {
                     const location = locations[i];
-                    if(typeof location.translate === "function") {
+                    if (typeof location.translate === "function") {
                         const result = location.translate(
                             dragStart.matrixTransform(ctx.getTransform().inverse()),
                             {x: oldX, y: oldY},
                             {x, y},
                             ctx.getTransform()
                         );
-                        if(result.updatedLocation) {
+                        if (result.updatedLocation) {
                             locations[i] = result.updatedLocation;
                         } else {
                             locations.splice(i, 1);
                             i--;
                         }
-                        if(result.stopPropagation === true) {
+                        if (result.stopPropagation === true) {
                             redraw();
                             return;
                         }
@@ -328,7 +364,7 @@ export function VacuumMap(canvasElement) {
         }
 
         function tap(evt) {
-            const { x, y } = relativeCoordinates(evt.tappedCoordinates, canvas);
+            const {x, y} = relativeCoordinates(evt.tappedCoordinates, canvas);
             const tappedX = x;
             const tappedY = y;
             const tappedPoint = ctx.transformedPoint(tappedX, tappedY);
@@ -336,17 +372,17 @@ export function VacuumMap(canvasElement) {
             // Let each location handle the tapping event
             // the location can return a stopPropagation bool which
             // stops the event handling by other locations / the main canvas
-            for(let i = 0; i < locations.length; ++i) {
+            for (let i = 0; i < locations.length; ++i) {
                 const location = locations[i];
-                if(typeof location.translate === "function") {
+                if (typeof location.translate === "function") {
                     const result = location.tap({x: tappedX, y: tappedY}, ctx.getTransform());
-                    if(result.updatedLocation) {
+                    if (result.updatedLocation) {
                         locations[i] = result.updatedLocation;
                     } else {
                         locations.splice(i, 1);
                         i--;
                     }
-                    if(result.stopPropagation === true) {
+                    if (result.stopPropagation === true) {
                         redraw();
                         return;
                     }
@@ -356,36 +392,39 @@ export function VacuumMap(canvasElement) {
             // remove previous goto point if there is any
             locations = locations.filter(l => !(l instanceof GotoPoint));
             const zones = locations.filter(l => l instanceof Zone);
-            if(zones.length === 0 && !options.noGotoPoints) {
+            if (zones.length === 0 && !options.noGotoPoints) {
                 locations.push(new GotoPoint(tappedPoint.x, tappedPoint.y));
             }
 
             redraw();
         }
 
+        // eslint-disable-next-line no-unused-vars
         const touchHandler = new TouchHandler(canvas);
 
         canvas.addEventListener("tap", tap);
-        canvas.addEventListener('panstart', startTranslate);
-        canvas.addEventListener('panmove', moveTranslate);
-        canvas.addEventListener('panend', endTranslate);
-        canvas.addEventListener('pinchstart', startPinch);
-        canvas.addEventListener('pinchmove', scalePinch);
-        canvas.addEventListener('pinchend', endPinch);
+        canvas.addEventListener("panstart", startTranslate);
+        canvas.addEventListener("panmove", moveTranslate);
+        canvas.addEventListener("panend", endTranslate);
+        canvas.addEventListener("pinchstart", startPinch);
+        canvas.addEventListener("pinchmove", scalePinch);
+        canvas.addEventListener("pinchend", endPinch);
 
 
         let lastScaleFactor = 1;
+
         function startPinch(evt) {
             lastScaleFactor = 1;
 
             // translate
-            const { x, y } = relativeCoordinates(evt.center, canvas);
-            lastX = x
+            const {x, y} = relativeCoordinates(evt.center, canvas);
+            lastX = x;
             lastY = y;
             dragStart = ctx.transformedPoint(lastX, lastY);
         }
 
         function endPinch(evt) {
+            // eslint-disable-next-line no-unused-vars
             const [scaleX, scaleY] = ctx.getScaleFactor2d();
             pathDrawer.scale(scaleX);
             endTranslate(evt);
@@ -400,7 +439,7 @@ export function VacuumMap(canvasElement) {
             ctx.translate(-pt.x, -pt.y);
 
             // translate
-            const { x, y } = relativeCoordinates(evt.center, canvas);
+            const {x, y} = relativeCoordinates(evt.center, canvas);
             lastX = x;
             lastY = y;
             const p = ctx.transformedPoint(lastX, lastY);
@@ -423,6 +462,7 @@ export function VacuumMap(canvasElement) {
                 ctx.scale(factor, factor);
                 ctx.translate(-pt.x, -pt.y);
 
+                // eslint-disable-next-line no-unused-vars
                 const [scaleX, scaleY] = ctx.getScaleFactor2d();
                 pathDrawer.scale(scaleX);
 
@@ -431,9 +471,9 @@ export function VacuumMap(canvasElement) {
             return evt.preventDefault() && false;
         };
 
-        canvas.addEventListener('DOMMouseScroll', handleScroll, false);
-        canvas.addEventListener('mousewheel', handleScroll, false);
-    };
+        canvas.addEventListener("DOMMouseScroll", handleScroll, false);
+        canvas.addEventListener("mousewheel", handleScroll, false);
+    }
 
     const prepareGotoCoordinatesForApi = (gotoPoint) => {
         const point = convertToRealCoords(gotoPoint);
@@ -468,8 +508,10 @@ export function VacuumMap(canvasElement) {
 
     const prepareFobriddenZoneCoordinatesForApi = (Zone) => {
         const p1Real = convertToRealCoords({x: Zone.x1, y: Zone.y1});
+        // eslint-disable-next-line no-unused-vars
         const p2Real = convertToRealCoords({x: Zone.x2, y: Zone.y2});
         const p3Real = convertToRealCoords({x: Zone.x3, y: Zone.y3});
+        // eslint-disable-next-line no-unused-vars
         const p4Real = convertToRealCoords({x: Zone.x4, y: Zone.y4});
         // right now will make this a mandatory rectangle - custom quadrilaterals would do later, if ever
         return [
@@ -519,11 +561,11 @@ export function VacuumMap(canvasElement) {
             newZone = new Zone(480, 480, 550, 550);
         }
 
-        if(addZoneInactive) {
+        if (addZoneInactive) {
             newZone.active = false;
         }
 
-        locations.forEach(location => location.active = false)
+        locations.forEach(location => location.active = false);
         locations.push(newZone);
         if (redrawCanvas) redrawCanvas();
     }
@@ -532,7 +574,7 @@ export function VacuumMap(canvasElement) {
         const p = convertFromRealCoords({x: spotCoordinates[0], y: spotCoordinates[1]});
         const newSpot = new GotoPoint(p.x, p.y);
 
-        locations.forEach(location => location.active = false)
+        locations.forEach(location => location.active = false);
         locations.push(newSpot);
         if (redrawCanvas) redrawCanvas();
     }
@@ -544,14 +586,14 @@ export function VacuumMap(canvasElement) {
             const p2 = convertFromRealCoords({x: wallCoordinates[2], y: wallCoordinates[3]});
             newVirtualWall = new VirtualWall(p1.x, p1.y, p2.x, p2.y, wallEditable);
         } else {
-            newVirtualWall = new VirtualWall(460,480,460,550, wallEditable);
+            newVirtualWall = new VirtualWall(460, 480, 460, 550, wallEditable);
         }
 
-        if(addWallInactive) {
+        if (addWallInactive) {
             newVirtualWall.active = false;
         }
 
-        locations.forEach(location => location.active = false)
+        locations.forEach(location => location.active = false);
         locations.push(newVirtualWall);
         if (redrawCanvas) redrawCanvas();
     }
@@ -568,11 +610,11 @@ export function VacuumMap(canvasElement) {
             newZone = new ForbiddenZone(480, 480, 550, 480, 550, 550, 480, 550, zoneEditable);
         }
 
-        if(addZoneInactive) {
+        if (addZoneInactive) {
             newZone.active = false;
         }
 
-        locations.forEach(location => location.active = false)
+        locations.forEach(location => location.active = false);
         locations.push(newZone);
         if (redrawCanvas) redrawCanvas();
     }
@@ -597,7 +639,7 @@ export function VacuumMap(canvasElement) {
  * relative coordinates should be calculated
  * @returns {{x: number, y: number}} coordinates relative to the referenceElement
  */
-function relativeCoordinates({ x, y }, referenceElement) {
+function relativeCoordinates({x, y}, referenceElement) {
     var rect = referenceElement.getBoundingClientRect();
     return {
         x: x - rect.left,
